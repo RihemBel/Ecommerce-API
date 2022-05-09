@@ -22,6 +22,8 @@ public class Item implements Serializable {
     private String name;
     @Column(name = "description", columnDefinition = "text")
     private String description;
+    @ManyToOne
+    private SubCategory subCategory;
     @NotNull
     @Column(name = "qttInStock", nullable = false, precision = 21, scale = 3)
     private int qttInStock;
@@ -84,6 +86,14 @@ public class Item implements Serializable {
         return image;
     }
 
+    public SubCategory getSubCategory() {
+        return subCategory;
+    }
+
+    public void setSubCategory(SubCategory subCategory) {
+        this.subCategory = subCategory;
+    }
+
     public void setImage(Set<ImageItem> image) {
         this.image = image;
     }
@@ -123,6 +133,7 @@ public class Item implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", subCategory=" + subCategory +
                 ", qttInStock=" + qttInStock +
                 ", price=" + price +
                 ", image=" + image +

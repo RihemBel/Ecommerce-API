@@ -34,8 +34,8 @@ public class Product implements Serializable {
     private int qttInStock;
     @Column(name = "color")
     private String color;
-//    @ManyToOne
-//    private SubCategory subCategory;
+    @ManyToOne
+    private SubCategory subCategory;
     @ManyToOne
     private Mark mark;
     @ManyToOne
@@ -112,15 +112,15 @@ public class Product implements Serializable {
     public void setColor(String color) {
         this.color = color;
     }
-//
-//    public SubCategory getSubCategory() {
-//        return subCategory;
-//    }
-//
-//    public void setSubCategory(SubCategory subCategory) {
-//        this.subCategory = subCategory;
-//    }
-//
+
+    public SubCategory getSubCategory() {
+        return subCategory;
+    }
+
+    public void setSubCategory(SubCategory subCategory) {
+        this.subCategory = subCategory;
+    }
+
     public Mark getMark() {
         return mark;
     }
