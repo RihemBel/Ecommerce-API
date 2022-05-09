@@ -3,6 +3,7 @@ package com.example.ecommerce.Web.rest;
 import com.example.ecommerce.Service.CategoryService;
 import com.example.ecommerce.Service.MarkService;
 import com.example.ecommerce.Service.ProductService;
+import com.example.ecommerce.Service.SubCategoryService;
 import com.example.ecommerce.Utility.HeaderUtil;
 import com.example.ecommerce.Utility.ResponseUtil;
 import com.example.ecommerce.Web.rest.VM.ProductWithHisItems;
@@ -10,6 +11,7 @@ import com.example.ecommerce.Web.rest.errors.BadRequestAlertException;
 import com.example.ecommerce.entities.Category;
 import com.example.ecommerce.entities.Mark;
 import com.example.ecommerce.entities.Product;
+import com.example.ecommerce.entities.SubCategory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
@@ -43,12 +45,15 @@ public class ProductController {
 
      private final MarkService markService;
 
+     private final SubCategoryService subCategoryService;
+
      private  final CategoryService categoryService;
 
-    public ProductController(ProductService productService, MarkService markService, CategoryService categoryService) {
+    public ProductController(ProductService productService, MarkService markService, SubCategoryService subCategoryService, CategoryService categoryService) {
         this.productService = productService;
 
         this.markService = markService;
+        this.subCategoryService = subCategoryService;
         this.categoryService = categoryService;
     }
 
@@ -66,12 +71,17 @@ public class ProductController {
         JsonObject object = g.fromJson(productJson,JsonObject.class);
         Product product = g.fromJson(productJson, Product.class);
         UUID mark_id= UUID.fromString(object.get("mark_id").getAsString());
+        UUID subCategory_id= UUID.fromString(object.get("subCategory_id").getAsString());
         UUID category_id= UUID.fromString(object.get("category_id").getAsString());
         Optional<Mark> mark= markService.findOne(mark_id);
+        Optional<SubCategory> subCategory= subCategoryService.findOne(subCategory_id);
         Optional<Category> category= categoryService.findOne(category_id);
         log.debug("REST request to save mark : {}", mark);
+        log.debug("REST request to save subCategory : {}", subCategory);
+        log.debug("REST request to save category : {}", category);
         log.debug("REST request to save product : {}", product);
         product.setCategory(category.get());
+        product.setSubCategory(subCategory.get());
         product.setMark(mark.get());
         if (product.getId() != null) {
             throw new BadRequestAlertException("A new product cannot already have an ID", ENTITY_NAME, "idexists");
