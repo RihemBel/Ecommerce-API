@@ -71,7 +71,7 @@ public class UserController {
     * @throws URISyntaxException if the Location URI syntax is incorrect.
     */
     @PostMapping("/registerUser")
-    public ResponseEntity<User> createUser( @RequestParam("user") String userJson) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public ResponseEntity<User> createUser( @RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("user") String userJson) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
         Gson g = new Gson();
         User user = g.fromJson(userJson, User.class);
 
@@ -79,7 +79,7 @@ public class UserController {
         if (user.getId() != null) {
             throw new BadRequestAlertException("A new user cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        User result = userService.registerUser(user);
+        User result = userService.registerUser(files,user);
 
         return ResponseEntity.created(new URI("/api/registerUser/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
