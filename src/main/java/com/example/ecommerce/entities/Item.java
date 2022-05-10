@@ -24,6 +24,7 @@ public class Item implements Serializable {
     private String description;
     @ManyToOne
     private SubCategory subCategory;
+    //zeyda
     @NotNull
     @Column(name = "qttInStock", nullable = false, precision = 21, scale = 3)
     private int qttInStock;

@@ -13,6 +13,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -40,6 +45,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         // @formatter:off
         http
+//                .cors()
+//                .and()
                 .csrf()
                 .disable()
 //                .exceptionHandling()
@@ -68,6 +75,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/image/upload").permitAll()
                 .and()
                 .apply(securityConfigurerAdapter());
+
+//        http.cors().configurationSource(new CorsConfigurationSource() {
+//
+//            @Override
+//            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                CorsConfiguration config = new CorsConfiguration();
+//                config.setAllowedHeaders(Collections.singletonList("*"));
+//                config.setAllowedMethods(Collections.singletonList("*"));
+//                config.addAllowedOrigin("*");
+//                config.setAllowCredentials(true);
+//                return config;
+//            }
+//        });
     }
 
     private JwtConfigurer securityConfigurerAdapter() {
