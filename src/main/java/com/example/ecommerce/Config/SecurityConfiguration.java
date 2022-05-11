@@ -45,24 +45,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         // @formatter:off
         http
-//                .cors()
-//                .and()
+                .cors()
+                .and()
                 .csrf()
                 .disable()
-//                .exceptionHandling()
+                .exceptionHandling()
 ////                .authenticationEntryPoint(problemSupport)
 ////                .accessDeniedHandler(problemSupport)
-//                .and()
-//                .headers()
-//                .contentSecurityPolicy("default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
-//                .and()
-//                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-//                .and()
-//                .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
-//                .and()
-//                .frameOptions()
-//                .deny()
-//                .and()
+                .and()
+                .headers()
+
+                .contentSecurityPolicy("default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
+                .and()
+                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                .and()
+                .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
+                .and()
+                .frameOptions()
+                .deny()
+                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -76,18 +77,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .apply(securityConfigurerAdapter());
 
-//        http.cors().configurationSource(new CorsConfigurationSource() {
-//
-//            @Override
-//            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//                CorsConfiguration config = new CorsConfiguration();
-//                config.setAllowedHeaders(Collections.singletonList("*"));
-//                config.setAllowedMethods(Collections.singletonList("*"));
-//                config.addAllowedOrigin("*");
-//                config.setAllowCredentials(true);
-//                return config;
-//            }
-//        });
+
     }
 
     private JwtConfigurer securityConfigurerAdapter() {
