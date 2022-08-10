@@ -1,5 +1,8 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -9,33 +12,38 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
-public class Order implements Serializable {
+public class Order  {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "order_id")
     private UUID id;
-    @Column(name="etat")
-    private String etat;
-    @Column(name = "date")
-    private Date date;
+//    @Column(name="etat")
+//    private String etat;
+     @Column(name = "totalAmount")
+     @JsonProperty("totalAmount")
+      private Double totalAmount;
+//    @JsonBackReference
     @ManyToOne
     private User user;
     @ManyToOne
     private ConfigLivraison configLivraison;
     @ManyToOne
     private Livraison livraison;
-    @OneToOne
-    private Panier panier;
-    @ManyToMany(mappedBy = "orders")
-    private Set<Item> items=new HashSet<>();
 
-    public Set<Item> getItems() {
-        return items;
-    }
+    @OneToMany(mappedBy = "order")
+    @JsonIgnoreProperties(value = "order",allowSetters = true)
+    Set<ProductOrder> productOrder;
 
-    public void setItems(Set<Item> items) {
-        this.items = items;
-    }
+//    @ManyToMany(mappedBy = "orders")
+//    private Set<Item> items=new HashSet<>();
+
+//    @OneToMany(mappedBy = "orders" , cascade = CascadeType.ALL)
+//    @JsonIgnoreProperties(value = "orders")
+//    private Set<OrderConfig> orderConfig = new HashSet<>();
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    @CreationTimestamp
+    private Date created;
 
     public UUID getId() {
         return id;
@@ -45,20 +53,20 @@ public class Order implements Serializable {
         this.id = id;
     }
 
-    public String getEtat() {
-        return etat;
+    public Date getCreated() {
+        return created;
     }
 
-    public void setEtat(String etat) {
-        this.etat = etat;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
-    public Date getDate() {
-        return date;
+    public Double getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public User getUser() {
@@ -77,6 +85,8 @@ public class Order implements Serializable {
         this.configLivraison = configLivraison;
     }
 
+
+
     public Livraison getLivraison() {
         return livraison;
     }
@@ -85,12 +95,12 @@ public class Order implements Serializable {
         this.livraison = livraison;
     }
 
-    public Panier getPanier() {
-        return panier;
+    public Set<ProductOrder> getProductOrder() {
+        return productOrder;
     }
 
-    public void setPanier(Panier panier) {
-        this.panier = panier;
+    public void setProductOrder(Set<ProductOrder> productOrder) {
+        this.productOrder = productOrder;
     }
 
     @Override
@@ -110,13 +120,10 @@ public class Order implements Serializable {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", etat='" + etat + '\'' +
-                ", date=" + date +
+                ", totalAmount=" + totalAmount +
                 ", user=" + user +
                 ", configLivraison=" + configLivraison +
                 ", livraison=" + livraison +
-                ", panier=" + panier +
-                ", items=" + items +
                 '}';
     }
 }

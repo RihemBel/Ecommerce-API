@@ -1,13 +1,16 @@
 package com.example.ecommerce.Web.rest;
 
+import com.example.ecommerce.Payload.JwtResponse;
 import com.example.ecommerce.Security.Jwt.JWTFilter;
 import com.example.ecommerce.Security.Jwt.TokenProvider;
 
 import com.example.ecommerce.Service.UserService;
 import com.example.ecommerce.Utility.HeaderUtil;
+import com.example.ecommerce.Utility.ResponseUtil;
 import com.example.ecommerce.Web.rest.VM.LoginVM;
 import com.example.ecommerce.Web.rest.errors.BadRequestAlertException;
 import com.example.ecommerce.entities.Category;
+import com.example.ecommerce.entities.Order;
 import com.example.ecommerce.entities.User;
 import com.example.ecommerce.repositories.RoleRepository;
 import com.example.ecommerce.repositories.UserRepository;
@@ -88,7 +91,7 @@ public class UserController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<JWTToken> authorize(@RequestBody LoginVM loginVM) {
+    public ResponseEntity<?> authorize(@RequestBody LoginVM loginVM) {
         log.info("loginVM");
         System.out.println("rrrrrrrrrrrrrrrrr "+ loginVM.getUsername());
         List<User> users = userRepository.findAll();
@@ -148,9 +151,57 @@ public class UserController {
         if (new JWTToken(jwt) == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<JWTToken>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
-    }
+//        return new ResponseEntity<JWTToken>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
 
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                user.get().getId(),
+                user.get().getFirstname(),
+                user.get().getLastname(),
+                user.get().getEmail(),
+        user.get().getPhone(),
+        user.get().getAdresse()));
+
+
+
+
+
+    }
+//    /**
+//     * {@code GET  /account} : get the current user.
+//     *
+//     * @return the current user.
+//     * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be returned.
+//     */
+//    @GetMapping("/users")
+//    public User getAccount() {
+//        return userService.getUserWithAuthorities()
+//                .map(UserDTO::new)
+//                .orElseThrow(() -> new AccountResourceException("User could not be found"));
+//    }
+
+    /**
+     * {@code DELETE  /users/:id} : delete the "id" user.
+     *
+     * @param id the id of the user to delete.
+     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+     */
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) throws ExecutionException, InterruptedException, IOException {
+        log.debug("REST request to delete User : {}", id);
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+    }
+    /**
+     * {@code GET  /users} : get all the articleCategories.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of categories in body.
+     */
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        log.debug("REST request to get a page of users");
+        List<User> page = (List<User>) userService.findAll();
+
+        return new ResponseEntity(page, HttpStatus.OK);
+    }
     static class JWTToken {
 
         private String idToken;
@@ -168,6 +219,11 @@ public class UserController {
             this.idToken = idToken;
         }
     }
-
+    @GetMapping("/user/{id}")
+    public ResponseEntity<User> getUser(@PathVariable UUID id) {
+        log.debug("REST request to get Order : {}", id);
+        Optional<User> user = userService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(user);
+    }
 
     }

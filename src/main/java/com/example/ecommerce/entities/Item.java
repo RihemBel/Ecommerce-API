@@ -1,10 +1,15 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sun.istack.NotNull;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +17,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "item")
-public class Item implements Serializable {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+        property  = "id",
+        scope     = UUID.class)
+public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="item_id")
@@ -22,26 +30,54 @@ public class Item implements Serializable {
     private String name;
     @Column(name = "description", columnDefinition = "text")
     private String description;
+    @Column(name = "sku")
+    private String sku;
     @ManyToOne
-    private SubCategory subCategory;
+    private Product product;
     //zeyda
     @NotNull
     @Column(name = "qttInStock", nullable = false, precision = 21, scale = 3)
-    private int qttInStock;
+    private BigDecimal qttInStock;
     @Column(name="price")
     private Double price;
-    @OneToMany(mappedBy = "item")
-    private Set<ImageItem> image = new HashSet<>();
-    @ManyToMany
-    @JoinTable(name = "item_panier",
-            joinColumns = @JoinColumn(name = "item_id", referencedColumnName = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "panier_id", referencedColumnName = "panier_id"))
-    private Set<Panier> panier=new HashSet<>();
-    @ManyToMany
-    @JoinTable(name = "item_order",
-    joinColumns = @JoinColumn(name = "item_id", referencedColumnName = "item_id"),
-    inverseJoinColumns = @JoinColumn(name = "order_id", referencedColumnName = "order_id"))
-    private Set<Order> orders=new HashSet<>();
+//    @OneToMany(mappedBy = "item")
+//    private Set<ImageItem> image = new HashSet<>();
+
+
+    @Column(name = "image")
+    private String image;
+//    @ManyToMany
+//    @JoinTable(name = "item_panier",
+//            joinColumns = @JoinColumn(name = "item_id", referencedColumnName = "item_id"),
+//            inverseJoinColumns = @JoinColumn(name = "panier_id", referencedColumnName = "panier_id"))
+//    private Set<Panier> panier=new HashSet<>();
+
+
+//    @ManyToMany
+//    @JoinTable(name = "item_order",
+//    joinColumns = @JoinColumn(name = "item_id", referencedColumnName = "item_id"),
+//    inverseJoinColumns = @JoinColumn(name = "order_id", referencedColumnName = "order_id"))
+//    private Set<Order> orders=new HashSet<>();
+
+
+    @Column(name = "deleted")
+    private Boolean deleted= false;
+
+    public Boolean getIsDeleted() {
+        return deleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
 
     public UUID getId() {
         return id;
@@ -67,11 +103,11 @@ public class Item implements Serializable {
         this.description = description;
     }
 
-    public int getQttInStock() {
+    public BigDecimal getQttInStock() {
         return qttInStock;
     }
 
-    public void setQttInStock(int qttInStock) {
+    public void setQttInStock(BigDecimal qttInStock) {
         this.qttInStock = qttInStock;
     }
 
@@ -83,37 +119,25 @@ public class Item implements Serializable {
         this.price = price;
     }
 
-    public Set<ImageItem> getImage() {
+    public String getImage() {
         return image;
     }
 
-    public SubCategory getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(SubCategory subCategory) {
-        this.subCategory = subCategory;
-    }
-
-    public void setImage(Set<ImageItem> image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
-    public Set<Panier> getPanier() {
-        return panier;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setPanier(Set<Panier> panier) {
-        this.panier = panier;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public Set<Order> getOrder() {
-        return orders;
-    }
 
-    public void setOrder(Set<Order> order) {
-        this.orders = order;
-    }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -134,12 +158,10 @@ public class Item implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", subCategory=" + subCategory +
+                ", product=" + product +
                 ", qttInStock=" + qttInStock +
                 ", price=" + price +
                 ", image=" + image +
-                ", panier=" + panier +
-                ", orders=" + orders +
                 '}';
     }
 }

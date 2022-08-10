@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "image_item")
-public class ImageItem implements Serializable {
+public class ImageItem extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -24,10 +24,13 @@ public class ImageItem implements Serializable {
     private String name;
 
 
-    @JsonBackReference
-    @ManyToOne
-    @JsonIgnoreProperties(value = "imageItems", allowSetters = true)
-    private Item item;
+    @Column(name = "avatar")
+    private String avatar;
+
+//    @JsonBackReference
+//    @ManyToOne
+//    @JsonIgnoreProperties(value = "imageItems", allowSetters = true)
+//    private Item item;
 
 
     public UUID getId() {
@@ -36,6 +39,14 @@ public class ImageItem implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getName() {
@@ -52,18 +63,7 @@ public class ImageItem implements Serializable {
     }
 
 
-    public Item getItem() {
-        return item;
-    }
 
-    public ImageItem item(Item item) {
-        this.item = item;
-        return this;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
 
     @Override
     public boolean equals(Object o) {

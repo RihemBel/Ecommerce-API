@@ -1,6 +1,10 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.istack.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,7 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "mark")
-public class Mark implements Serializable {
+public class Mark  {
     @Id
     @GeneratedValue( strategy = GenerationType.AUTO)
     private UUID id;
@@ -19,9 +23,21 @@ public class Mark implements Serializable {
     private String name;
     @Column(name = "image")
     private String  image;
-    @OneToMany(mappedBy = "mark")
+
+    @OneToMany(mappedBy = "mark" , cascade = CascadeType.ALL)
+    @JsonIgnoreProperties(value = "mark")
+    @JsonBackReference
     private Set<Product> product= new HashSet<>();
 
+    private Boolean deleted= false;
+
+    public Boolean getIsDeleted() {
+        return deleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
     public UUID getId() {
         return id;
     }

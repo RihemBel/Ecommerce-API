@@ -1,21 +1,30 @@
 package com.example.ecommerce.entities;
 
 import com.example.ecommerce.Config.Constants;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name="product")
-public class Product implements Serializable {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+        property  = "id",
+        scope     = UUID.class)
+public class Product  {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="product_id")
     private UUID id;
     @NotNull
     @Column(name = "name", nullable = false)
@@ -27,26 +36,64 @@ public class Product implements Serializable {
     @Column(name = "has_variant")
     @JsonProperty("hasVariant")
     private Boolean hasVariant;
+    @Column(name = "sku")
+    @JsonProperty("sku")
+    private String sku;
     @Column(name = "image")
     private String image;
     @NotNull
     @Column(name = "qttInStock", nullable = false, precision = 21, scale = 3)
-    private int qttInStock;
-    @Column(name = "color")
-    private String color;
+    private BigDecimal qttInStock;
+
+//    @JsonIgnoreProperties(value = "product",allowSetters = true)
     @ManyToOne
+    //@JsonManagedReference
     private SubCategory subCategory;
     @ManyToOne
+    @JsonIgnoreProperties(value = "product")
+    //@JsonManagedReference
     private Mark mark;
-    @ManyToOne
-   private Category Category;
+//    @ManyToOne
+//    @JsonIgnoreProperties(value = "product")
+//    //@JsonManagedReference
+//    private Category category;
 
-    public Category getCategory() {
-        return Category;
+    @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL)
+    @JsonIgnoreProperties(value = "product")
+    private Set<Item> item=new HashSet<>();
+//    @ManyToMany(mappedBy = "product")
+//    private Set<Panier> panier=new HashSet<>();
+
+    @Column(name = "deleted")
+    private Boolean deleted= false;
+
+    @OneToMany(mappedBy = "product")
+//    @JsonIgnoreProperties(value = "product",allowSetters = true)
+            @JsonIgnore
+    Set<ProductOrder> productOrder;
+
+    public Boolean getIsDeleted() {
+        return deleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public SubCategory getSubCategory() {
+        return subCategory;
+    }
+
+    public Set<ProductOrder> getProductOrder() {
+        return productOrder;
+    }
+
+    public void setProductOrder(Set<ProductOrder> productOrder) {
+        this.productOrder = productOrder;
     }
 
     public void setCategory(Category category) {
-        Category = category;
+        category = category;
     }
 
     public String getImage() {
@@ -73,6 +120,24 @@ public class Product implements Serializable {
         this.name = name;
     }
 
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+
+
+    public Set<Item> getItem() {
+        return item;
+    }
+
+    public void setItem(Set<Item> item) {
+        this.item = item;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -97,24 +162,12 @@ public class Product implements Serializable {
         this.price = price;
     }
 
-    public int getQttInStock() {
+    public BigDecimal getQttInStock() {
         return qttInStock;
     }
 
-    public void setQttInStock(int qttInStock) {
+    public void setQttInStock(BigDecimal qttInStock) {
         this.qttInStock = qttInStock;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public SubCategory getSubCategory() {
-        return subCategory;
     }
 
     public void setSubCategory(SubCategory subCategory) {
@@ -150,10 +203,11 @@ public class Product implements Serializable {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", hasVariant=" + hasVariant +
+                ", image='" + image + '\'' +
                 ", qttInStock=" + qttInStock +
-                ", color='" + color + '\'' +
-//                ", subCategory=" + subCategory +
+                ", subCategory=" + subCategory +
                 ", mark=" + mark +
+                ", item=" + item +
                 '}';
     }
 }

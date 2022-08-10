@@ -2,15 +2,20 @@ package com.example.ecommerce.entities;
 
 import com.example.ecommerce.Config.Constants;
 import com.example.ecommerce.Service.UserService;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sun.istack.NotNull;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -46,13 +51,8 @@ public class User {
             inverseJoinColumns = {@JoinColumn(name = "authority_id", referencedColumnName = "name")})
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
-
-    @Column(name = "sexe")
-    private String sexe;
     @Column(name = "adresse")
     private  String adresse;
-    @Column(name = "dateNaissance")
-    private Date dateNaissance;
     @Size(max = 15)
     @Column(name = "phone")
     private String phone;
@@ -64,10 +64,22 @@ public class User {
 
     @Column(name = "image")
     private String image;
-    @OneToOne
-    private Panier panier;
+//    @OneToOne
+//    private Panier panier;
+//@JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<Order> order = new HashSet<>();
+
+    private Boolean deleted= false;
+
+    public Boolean getIsDeleted() {
+        return deleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
 
     public User() {
     }
@@ -80,6 +92,11 @@ public class User {
 
     public User(String subject, String firstname, Collection<? extends GrantedAuthority> authorities) {
     }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
 
     public UUID getId() {
         return id;
@@ -145,13 +162,7 @@ public class User {
         this.login = login;
     }
 
-    public String getSexe() {
-        return sexe;
-    }
 
-    public void setSexe(String sexe) {
-        this.sexe = sexe;
-    }
 
     public String getAdresse() {
         return adresse;
@@ -161,13 +172,6 @@ public class User {
         this.adresse = adresse;
     }
 
-    public Date getDateNaissance() {
-        return dateNaissance;
-    }
-    //RIRIRIRI
-    public void setDateNaissance(Date dateNaissance) {
-        this.dateNaissance = dateNaissance;
-    }
 
     public String getPhone() {
         return phone;
@@ -185,13 +189,7 @@ public class User {
         this.image = image;
     }
 
-    public Panier getPanier() {
-        return panier;
-    }
 
-    public void setPanier(Panier panier) {
-        this.panier = panier;
-    }
 
     public Set<Order> getOrder() {
         return order;
@@ -200,6 +198,8 @@ public class User {
     public void setOrder(Set<Order> order) {
         this.order = order;
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -224,14 +224,11 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", authorities=" + authorities +
-                ", sexe='" + sexe + '\'' +
                 ", adresse='" + adresse + '\'' +
-                ", dateNaissance=" + dateNaissance +
                 ", phone='" + phone + '\'' +
                 ", activated=" + activated +
                 ", image=" + image +
-                ", panier=" + panier +
-                ", order=" + order +
+                //", order=" + order +
                 '}';
     }
 

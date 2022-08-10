@@ -19,11 +19,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,34 +62,33 @@ public class ProductController {
     /**
      * {@code POST  /products} : Create a new product.
      *
-     * @param productJson the product to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new product, or with status {@code 400 (Bad Request)} if the product has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/products")
-    public ResponseEntity<Product> createArticle(@RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("product") String productJson) throws URISyntaxException, IOException {
-
-        Gson g = new Gson();
-        JsonObject object = g.fromJson(productJson,JsonObject.class);
-        Product product = g.fromJson(productJson, Product.class);
-        UUID mark_id= UUID.fromString(object.get("mark_id").getAsString());
-        UUID subCategory_id= UUID.fromString(object.get("subCategory_id").getAsString());
-        UUID category_id= UUID.fromString(object.get("category_id").getAsString());
-        Optional<Mark> mark= markService.findOne(mark_id);
-        Optional<SubCategory> subCategory= subCategoryService.findOne(subCategory_id);
-        Optional<Category> category= categoryService.findOne(category_id);
-        log.debug("REST request to save mark : {}", mark);
-        log.debug("REST request to save subCategory : {}", subCategory);
-        log.debug("REST request to save category : {}", category);
+    public ResponseEntity<Product> createArticle(@Valid @RequestBody Product product) throws URISyntaxException, IOException {
+        System.out.println("productss "+ product);
+//        Gson g = new Gson();
+//        JsonObject object = g.fromJson(productJson,JsonObject.class);
+//        Product product = g.fromJson(productJson, Product.class);
+//        UUID mark_id= UUID.fromString(object.get("mark_id").getAsString());
+//        UUID subCategory_id= UUID.fromString(object.get("subCategory_id").getAsString());
+//        UUID category_id= UUID.fromString(object.get("category_id").getAsString());
+//        Optional<Mark> mark= markService.findOne(mark_id);
+//        Optional<SubCategory> subCategory= subCategoryService.findOne(subCategory_id);
+//        Optional<Category> category= categoryService.findOne(category_id);
+//        log.debug("REST request to save mark : {}", mark);
+//        log.debug("REST request to save subCategory : {}", subCategory);
+//        log.debug("REST request to save category : {}", category);
         log.debug("REST request to save product : {}", product);
-        product.setCategory(category.get());
-        product.setSubCategory(subCategory.get());
-        product.setMark(mark.get());
+//        product.setCategory(category.get());
+//        product.setSubCategory(subCategory.get());
+//        product.setMark(mark.get());
         if (product.getId() != null) {
             throw new BadRequestAlertException("A new product cannot already have an ID", ENTITY_NAME, "idexists");
         }
 
-        Product result = productService.save(files, product);
+        Product result = productService.save( product);
         return ResponseEntity.created(new URI("/api/products/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                 .body(result);
@@ -96,17 +97,17 @@ public class ProductController {
 
     @PutMapping("/products")
     public @ResponseBody
-    ResponseEntity<Product> updateArticle(@RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("product") String productJson) throws URISyntaxException, IOException {
+    ResponseEntity<Product> updateArticle(@Valid @RequestBody Product product) throws URISyntaxException, IOException {
 
         Gson g = new Gson();
-        Product product = g.fromJson(productJson, Product.class);
+//        Product product = g.fromJson(productJson, Product.class);
 
         log.debug("REST request to update Product : {}", product);
         if (product.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
 
-        Product result = productService.save(files, product);
+        Product result = productService.save( product);
         return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                 .body(result);
@@ -145,7 +146,7 @@ public class ProductController {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of products in body.
      */
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getAllProducts(Pageable pageable) {
+    public ResponseEntity<List<Product>> getAllProducts(@PageableDefault( value = Integer.MAX_VALUE)  Pageable pageable) {
         log.debug("REST request to get a page of Products");
         Page<Product> result = productService.findAll(pageable);
 

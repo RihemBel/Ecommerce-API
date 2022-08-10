@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,25 +50,27 @@ private final CategoryService categoryService;
     /**
      * {@code POST  /subCategories} : Create a new subCategory.
      *
-     * @param subCategoryJson the category to create.
+//     * @param subCategoryJson the category to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new subCategory, or with status {@code 400 (Bad Request)} if the subCategory has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/subCategories")
-    public ResponseEntity<SubCategory> createSubCategory(@RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("subCategory") String subCategoryJson) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public ResponseEntity<SubCategory> createSubCategory(@Valid @RequestBody SubCategory subCategory) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+//        log.debug("here: " + subCategoryJson);
         Gson g = new Gson();
-        JsonObject object = g.fromJson(subCategoryJson,JsonObject.class);
-        SubCategory subCategory = g.fromJson(subCategoryJson, SubCategory.class);
-        UUID category_id= UUID.fromString(object.get("category_id").getAsString());
-        Optional<Category> category= categoryService.findOne(category_id);
-        log.debug("REST request to save category : {}", category);
+//        JsonObject object = g.fromJson(subCategory,JsonObject.class);
+//        SubCategory subCategory = g.fromJson(subCategoryJson, SubCategory.class);
+//        UUID category_id= UUID.fromString(object.get("category_id").getAsString());
+//        Optional<Category> category= categoryService.findOne(category_id);
+//        System.out.println("files"+files);
+//        log.debug("REST request to save category : {}", category);
         log.debug("REST request to save SubCategory : {}", subCategory);
-        subCategory.setCategory(category.get());
+//        subCategory.setCategory(category.get());
 
         if (subCategory.getId() != null) {
             throw new BadRequestAlertException("A new subCategory cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        SubCategory result = subCategoryService.save(files, subCategory);
+        SubCategory result = subCategoryService.save(subCategory);
 
         return ResponseEntity.created(new URI("/api/subCategories/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -77,7 +80,7 @@ private final CategoryService categoryService;
     /**
      * {@code PUT  /subCategories} : Updates an existing subCategory.
      *
-     * @param subCategoryJson the category to update.
+//     * @param subCategoryJson the category to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated subCategory,
      * or with status {@code 400 (Bad Request)} if the category is not valid,
      * or with status {@code 500 (Internal Server Error)} if the category couldn't be updated.
@@ -86,16 +89,16 @@ private final CategoryService categoryService;
 
 
     @PutMapping("/subCategories")
-    public ResponseEntity<SubCategory> updateSubCategory(@RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("subCategory") String subCategoryJson) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public ResponseEntity<SubCategory> updateSubCategory(@Valid @RequestBody SubCategory subCategory) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
 
         Gson g = new Gson();
-        SubCategory subCategory = g.fromJson(subCategoryJson , SubCategory.class);
+//        SubCategory subCategory = g.fromJson(subCategoryJson , SubCategory.class);
 
         log.debug("REST request to update SubCategory : {}", subCategory);
         if (subCategory.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        SubCategory result = subCategoryService.save(files, subCategory);
+        SubCategory result = subCategoryService.save( subCategory);
         return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, subCategory.getId().toString()))
                 .body(result);
@@ -123,6 +126,14 @@ private final CategoryService categoryService;
         log.debug("REST request to get SubCategory : {}", id);
         Optional<SubCategory> subCategory = subCategoryService.findOne(id);
         return ResponseUtil.wrapOrNotFound(subCategory);
+    }
+
+    @GetMapping("/subCategories/{id}")
+    public ResponseEntity<List<SubCategory>> getAllSubCategoriesByCategories(@PathVariable UUID id) {
+        log.debug("REST request to get a page of SubCategories");
+        List<SubCategory> page = (List<SubCategory>) subCategoryService.findAllSubCa(id);
+
+        return new ResponseEntity(page, HttpStatus.OK);
     }
 
     /**

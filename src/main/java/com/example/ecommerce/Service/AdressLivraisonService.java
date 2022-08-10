@@ -17,7 +17,7 @@ import java.util.UUID;
 @Service
 @Transactional
 public class AdressLivraisonService {
-    private final Logger log = LoggerFactory.getLogger(PanierService.class);
+    private final Logger log = LoggerFactory.getLogger(AdressLivraison.class);
     private final AdressLivraisonRepository adressLivraisonRepository;
 
 

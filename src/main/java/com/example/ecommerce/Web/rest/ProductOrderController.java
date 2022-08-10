@@ -1,11 +1,10 @@
 package com.example.ecommerce.Web.rest;
 
 
-import com.example.ecommerce.Service.LignePanierService;
+import com.example.ecommerce.Service.ProductOrderService;
 import com.example.ecommerce.Utility.HeaderUtil;
 import com.example.ecommerce.Utility.ResponseUtil;
-import com.example.ecommerce.entities.LignePanier;
-import com.example.ecommerce.entities.Panier;
+import com.example.ecommerce.entities.ProductOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -20,18 +19,18 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-public class LignePanierController {
+public class ProductOrderController {
 
-    private final Logger log = LoggerFactory.getLogger(LignePanierController.class);
+    private final Logger log = LoggerFactory.getLogger(ProductOrderController.class);
 
     private static final String ENTITY_NAME = "mywaybaseLignePanier";
 
     private String applicationName;
 
-    private final LignePanierService lignePanierService;
+    private final ProductOrderService productOrderService;
 
-    public LignePanierController(LignePanierService lignePanierService) {
-        this.lignePanierService = lignePanierService;
+    public ProductOrderController( ProductOrderService productOrderService) {
+        this.productOrderService = productOrderService;
     }
 
 
@@ -39,9 +38,9 @@ public class LignePanierController {
      * {@code POST  /lignePanier} : Create a new lignePanier.
      */
     @PostMapping("/lignePanier")
-    public void createLignePanier(@RequestBody LignePanier lp) {
+    public void createLignePanier(@RequestBody ProductOrder lp) {
 
-        lignePanierService.save(lp);
+        productOrderService.save(lp);
     }
 
     /**
@@ -51,9 +50,9 @@ public class LignePanierController {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of variantValue in body.
      */
     @GetMapping("/lignePanier")
-    public ResponseEntity<List<LignePanier>> getAlllignePanier(Pageable pageable) {
+    public ResponseEntity<List<ProductOrder>> getAlllignePanier(Pageable pageable) {
         log.debug("REST request to get a page of lignePanier");
-        Page<LignePanier> page = (Page<LignePanier>) lignePanierService.findAll(pageable);
+        Page<ProductOrder> page = (Page<ProductOrder>) productOrderService.findAll(pageable);
 
         return new ResponseEntity(page, HttpStatus.OK);
     }
@@ -65,9 +64,9 @@ public class LignePanierController {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the lignePanier, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/lignePanier/{id}")
-    public ResponseEntity<LignePanier> getLignePanier(@PathVariable UUID id) {
+    public ResponseEntity<ProductOrder> getLignePanier(@PathVariable UUID id) {
         log.debug("REST request to get Panier : {}", id);
-        Optional<LignePanier> lignePanier = lignePanierService.findOne(id);
+        Optional<ProductOrder> lignePanier = productOrderService.findOne(id);
         return ResponseUtil.wrapOrNotFound(lignePanier);
     }
 
@@ -81,7 +80,7 @@ public class LignePanierController {
     @DeleteMapping("/lignePanier/{id}")
     public ResponseEntity<Void> deleteLignePanier(@PathVariable UUID id) {
         log.debug("REST request to delete LignePanier : {}", id);
-        lignePanierService.delete(id);
+        productOrderService.delete(id);
         return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
     }
 

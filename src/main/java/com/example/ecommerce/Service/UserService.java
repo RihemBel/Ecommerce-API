@@ -5,6 +5,8 @@ import com.example.ecommerce.Config.StorageProperties;
 import com.example.ecommerce.Security.AuthoritiesConstants;
 import com.example.ecommerce.Service.exception.InvalidPasswordException;
 import com.example.ecommerce.entities.Authority;
+import com.example.ecommerce.entities.Category;
+import com.example.ecommerce.entities.Mark;
 import com.example.ecommerce.entities.User;
 import com.example.ecommerce.repositories.RoleRepository;
 import com.example.ecommerce.repositories.UserRepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -104,19 +107,27 @@ public class UserService {
 
             String newNameOfImage = nameWithoutExtension + currentDate + extension;
 
-            String newPath = storageProps.getUrl() + "/topmaticImages/topmaticUsers/" + newNameOfImage;
+            String newPath = storageProps.getUrl() + "/resources/topmaticImages/topmaticUsers/" + newNameOfImage;
             newUser.setImage(newPath);
+
+//            String content = new String(files.getBytes(), StandardCharsets.UTF_8);
+//            byte[] scanBytes = Base64.getDecoder().decode(content);
+//            try {
+//                Files.write(rootUsers, scanBytes);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+
         }
         String phoneWithoutSpace = user.getPhone().replace(" ", "");
         newUser.setPhone(phoneWithoutSpace);
-        newUser.setSexe(user.getSexe());
         newUser.setAdresse(user.getAdresse());
-        newUser.setDateNaissance(user.getDateNaissance());
         newUser.setActivated(true);
 
         Set<Authority> roles = new HashSet<>();
       //  roleRepository.findByRoleName(RoleName.ROLE_ADMIN).ifPresent(roles::add);
-        roleRepository.findById(AuthoritiesConstants.ADMIN).ifPresent(roles::add);
+        roleRepository.findById(AuthoritiesConstants.CLIENT).ifPresent(roles::add);
         System.out.println("roles "+ roles);
 //        Optional<Role> role = roleRepository.findByRoleName(RoleName.ROLE_ADMIN);
         System.out.println("role of user"+roles);
@@ -138,11 +149,13 @@ public class UserService {
         return newUser;
 
     }
-    public void deleteUser(String login) {
-        userRepository.findByLogin(login).ifPresent(user -> {
-            userRepository.delete(user);
+    public void deleteUser(UUID id) {
+        userRepository.findById(id).ifPresent(user -> {
             // this.clearUserCaches(user);
             log.debug("Deleted User: {}", user);
+            user.setIsDeleted(true);
+            userRepository.save(user);
+
         });
     }
     @Transactional
@@ -220,6 +233,17 @@ public class UserService {
 
     public Optional<User> getUserWithRolesByEmail(String email) {
         return userRepository.findOneWithAuthoritiesByEmail(email);
+    }
+
+    /**
+     * Get all the users.
+     *
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        log.debug("Request to get all Users");
+        return userRepository.findAll();
     }
 }
 

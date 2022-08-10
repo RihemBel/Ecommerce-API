@@ -1,9 +1,11 @@
 package com.example.ecommerce.Service;
 
 import com.example.ecommerce.Config.StorageProperties;
-import com.example.ecommerce.Security.SecurityUtils;
 import com.example.ecommerce.entities.Category;
+import com.example.ecommerce.entities.Product;
+import com.example.ecommerce.entities.SubCategory;
 import com.example.ecommerce.repositories.CategoryRepository;
+import com.example.ecommerce.repositories.SubCategoryRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,10 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    private final SubCategoryRepository subCategoryRepository;
+
+//    private final SubCategory subCategory;
+
     private final MessageSource messageSource;
 
     private final StorageProperties storageProps;
@@ -38,8 +44,9 @@ public class CategoryService {
 
     private final NotificationService notificationService;
 
-    public CategoryService(CategoryRepository categoryRepository, MessageSource messageSource, StorageProperties storageProps, DataSource dataSource, NotificationService notificationService) {
+    public CategoryService(CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, MessageSource messageSource, StorageProperties storageProps, DataSource dataSource, NotificationService notificationService) {
         this.categoryRepository = categoryRepository;
+        this.subCategoryRepository = subCategoryRepository;
         this.messageSource = messageSource;
         this.storageProps = storageProps;
         this.dataSource = dataSource;
@@ -89,7 +96,7 @@ public class CategoryService {
 
             String newNameOfImage = nameWithoutExtension + currentDate + extension;
 
-            String newPath = storageProps.getUrl()+"/topmaticImages/topmaticCategories/"+newNameOfImage;
+            String newPath = storageProps.getUrl()+"/resources/topmaticImages/topmaticCategories/"+newNameOfImage;
             category.setImage(newPath);
         }
 
@@ -116,8 +123,9 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public List<Category> findAll() {
         log.debug("Request to get all ProductCategories");
-        return categoryRepository.findAll();
 
+
+            return categoryRepository.findAllCa();
     }
 
     /**
@@ -173,8 +181,21 @@ public class CategoryService {
      */
     public void delete(UUID id) throws IOException {
         log.debug("Request to delete category : {}", id);
-        categoryRepository.deleteById(id);
+//        categoryRepository.deleteById(id);
 
+
+        Category category = categoryRepository.findById(id).get();
+        category.setIsDeleted(true);
+
+        for(SubCategory subCategory : category.getSubCategory()) {
+            subCategory.setIsDeleted(true);
+        }
+//        for(Product product : category.getProduct()) {
+//            product.setDeleted(true);
+//        }
+
+        categoryRepository.save(category);
     }
+
 
 }

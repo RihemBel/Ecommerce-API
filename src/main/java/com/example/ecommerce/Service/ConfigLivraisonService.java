@@ -19,7 +19,7 @@ import java.util.UUID;
 @Transactional
 public class ConfigLivraisonService {
 
-    private final Logger log = LoggerFactory.getLogger(PanierService.class);
+    private final Logger log = LoggerFactory.getLogger(ConfigLivraison.class);
     private final ConfigLivraisonRepository configLivraisonRepository;
 
     public ConfigLivraisonService(ConfigLivraisonRepository configLivraisonRepository) {

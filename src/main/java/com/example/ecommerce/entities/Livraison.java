@@ -1,5 +1,7 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -15,6 +17,7 @@ public class Livraison implements Serializable {
     private UUID id;
     @Column(name="name")
     private String name;
+    @JsonFormat(shape=JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "UTC")
     @Column(name="date")
     private Date date;
     @Column(name="etat")

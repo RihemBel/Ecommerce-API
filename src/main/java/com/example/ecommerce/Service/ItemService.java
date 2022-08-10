@@ -1,25 +1,21 @@
 package com.example.ecommerce.Service;
 
-import com.example.ecommerce.entities.Category;
-import com.example.ecommerce.entities.ImageItem;
-import com.example.ecommerce.entities.Item;
-import com.example.ecommerce.entities.Product;
-import com.example.ecommerce.repositories.BlogRepository;
-import com.example.ecommerce.repositories.ItemRepository;
-import com.example.ecommerce.repositories.PivvRepository;
-import com.example.ecommerce.repositories.ProductRepository;
+import com.example.ecommerce.Config.StorageProperties;
+import com.example.ecommerce.entities.*;
+import com.example.ecommerce.repositories.*;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Transactional
@@ -32,33 +28,86 @@ public class ItemService {
 
     private final PivvRepository pivvRepository;
 
+    private final StorageProperties storageProps;
+
     private final ProductService productService;
 
     private final BlogRepository blogRepository;
 
     private final ImageService imageService;
 
+    private final ImageRepository imageRepository;
+
     private final ProductRepository productRepository;
 
-    public ItemService(ItemRepository itemRepository, PivvRepository pivvRepository, ProductService productService, BlogRepository blogRepository, ImageService imageService, ProductRepository productRepository) {
+    public ItemService(ItemRepository itemRepository, StorageProperties storageProps, PivvRepository pivvRepository, ProductService productService, BlogRepository blogRepository, ImageService imageService, ImageRepository imageRepository, ProductRepository productRepository) {
         this.itemRepository = itemRepository;
+        this.storageProps = storageProps;
         this.pivvRepository = pivvRepository;
         this.productService = productService;
         this.blogRepository = blogRepository;
         this.imageService = imageService;
+        this.imageRepository = imageRepository;
         this.productRepository = productRepository;
     }
 
     /**
-     * Save an item.
+     * Save a Item.
      *
+     * @param item the entity to save.
      * @return the persisted entity.
      */
-    public Item save(Item item) {
-        //   item.setIsDeleted(false);
-        return itemRepository.save(item);
+    public Item save( Item item) throws IOException {
+        log.debug("Request to save Item : {}", item);
 
+        return itemRepository.save(item);
     }
+
+
+//    /**
+//     * Save an item.
+//     *
+//     * @param item the entity to save.
+//     * @return the persisted entity.
+//     */
+//    public Item save(Item item) throws IOException {
+//
+//            String path = storageProps.getPath();
+////            System.out.println(path);
+//            String realPath = path.substring(7,path.length());
+//            System.out.println(item);
+//
+//        Set<ImageItem> imageItemList = item.getImage();
+//        if(imageItemList.size() != 0) {
+//            for (ImageItem imageItem : imageItemList) {
+//                if (imageItem.getId() == null) {
+//                    Random rand = new Random();
+//                    int rand_int1 = rand.nextInt(1000);
+//                    String currentDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+//                    String fileName = imageItem.getName();
+//                    int locationofExtension = fileName.lastIndexOf('.');
+//                    String extension = fileName.substring(locationofExtension, fileName.length());
+//                    String nameWithoutExtension = fileName.substring(0, locationofExtension);
+//                    String newNameOfImage = nameWithoutExtension + currentDate + rand_int1 + extension;
+//                    //   System.out.println(newNameOfImage+"   name of Image");
+//                    String pathImageItems = storageProps.getUrl() + "/resources/topmaticImages/topmaticItems/" + newNameOfImage;
+//                    imageItem.setName(pathImageItems);
+//                    imageItem.setItem(item);
+//                    imageRepository.save(imageItem);
+//
+//                    String itemsFolder = realPath + "/topmaticImages/topmaticItems/";
+//
+//
+//                    Path rootItems = Paths.get(itemsFolder);
+//                    byte[] scanBytes = Base64.getDecoder().decode(imageItem.getName());
+//                    Files.write(rootItems, scanBytes);
+//                }
+//            }
+//        }
+//        return itemRepository.save(item);
+//    }
+
+
     /**
      * Get one item by id.
      *
@@ -79,24 +128,18 @@ public class ItemService {
      * @param id the id of the entity.
      */
     public void delete(UUID id) throws IOException {
-        log.debug("Request to delete Item : {}", id);
-        Product product = pivvRepository.getProduct_ofItem(id);
-        Optional<Item> item = this.findOne(id);
-        Set<ImageItem> imageItemSet = item.get().getImage();
-        if(imageItemSet.size() != 0) {
-            for (ImageItem imageItem : imageItemSet) {
-                imageService.delete(imageItem.getId());
+        log.debug("Request to delete category : {}", id);
+//        categoryRepository.deleteById(id);
 
-            }
-        }
-        itemRepository.deleteById(id);
 
-        List<Item> itemList = pivvRepository.getAllItems_ofProduct(product.getId());
-        if(itemList.size() == 0){
-            productService.delete(product.getId());
-        }
+        Item item = itemRepository.findById(id).get();
+        item.setIsDeleted(true);
 
+
+
+        itemRepository.save(item);
     }
+
     /**
      * Get all the items.
      *
@@ -110,19 +153,19 @@ public class ItemService {
     }
     //used to delete item before update product
 
-    public void deleteToUpdateProduct(UUID id) throws IOException {
-        log.debug("Request to delete Item : {}", id);
-        Product product = pivvRepository.getProduct_ofItem(id);
-        Optional<Item> item = this.findOne(id);
-        Set<ImageItem>imageItemSet = item.get().getImage();
-        if(imageItemSet.size() != 0) {
-            for (ImageItem imageItem : imageItemSet) {
-                imageService.delete(imageItem.getId());
-
-            }
-        }
-        itemRepository.deleteById(id);
-
-    }
+//    public void deleteToUpdateProduct(UUID id) throws IOException {
+//        log.debug("Request to delete Item : {}", id);
+//        Product product = pivvRepository.getProduct_ofItem(id);
+//        Optional<Item> item = this.findOne(id);
+//        Set<ImageItem>imageItemSet = item.get().getImage();
+//        if(imageItemSet.size() != 0) {
+//            for (ImageItem imageItem : imageItemSet) {
+//                imageService.delete(imageItem.getId());
+//
+//            }
+//        }
+//        itemRepository.deleteById(id);
+//
+//    }
 
 }

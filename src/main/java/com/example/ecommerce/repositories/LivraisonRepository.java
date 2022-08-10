@@ -2,7 +2,6 @@ package com.example.ecommerce.repositories;
 
 import com.example.ecommerce.entities.Livraison;
 import com.example.ecommerce.entities.Mark;
-import com.example.ecommerce.entities.Panier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
@@ -23,5 +24,8 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Page<Category> findAllByOrderByName(Pageable pageable);
 
     Category findByName(String name);
+
+    @Query("SELECT c  from Category c  where  c.deleted= false ")
+    List<Category> findAllCa();
 
 }

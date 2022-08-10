@@ -2,6 +2,7 @@ package com.example.ecommerce.Service;
 
 import com.example.ecommerce.Config.StorageProperties;
 import com.example.ecommerce.entities.Mark;
+import com.example.ecommerce.entities.SubCategory;
 import com.example.ecommerce.repositories.BlogRepository;
 import com.example.ecommerce.repositories.MarkRepository;
 import com.google.gson.JsonElement;
@@ -90,24 +91,23 @@ public class MarkService {
 
                 String newNameOfImage = nameWithoutExtension + currentDate + extension;
 
-                String newPath = storageProps.getUrl()+"/topmaticImages/topmaticMarks/"+newNameOfImage;
+                String newPath = storageProps.getUrl()+"/resources/topmaticImages/topmaticMarks/"+newNameOfImage;
                 mark.setImage(newPath);
             }
 
             return markRepository.save(mark);
         }
-
-    /**
-     * Get all the marks.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
-    @Transactional(readOnly = true)
-    public Page<Mark> findAll(Pageable pageable) {
-        log.debug("Request to get all Marks");
-        return markRepository.findAll(pageable);
-    }
+//
+//    /**
+//     * Get all the marks.
+//     *
+//     * @return the list of entities.
+//     */
+//    @Transactional(readOnly = true)
+//    public List<Mark> findAll() {
+//        log.debug("Request to get all Marks");
+//        return markRepository.findAllM();
+//    }
 
     /**
      * Get all the marks.
@@ -117,7 +117,7 @@ public class MarkService {
     @Transactional(readOnly = true)
     public List<Mark> findAll() {
         log.debug("Request to get all Marks");
-        return markRepository.findAll();
+        return markRepository.findAllM();
     }
 
     /**
@@ -139,7 +139,9 @@ public class MarkService {
      */
     public void delete(UUID id) throws ExecutionException, InterruptedException {
         log.debug("Request to delete Mark : {}", id);
-        markRepository.deleteById(id);
+//        markRepository.deleteById(id);
+        Mark mark = markRepository.findById(id).get();
+        mark.setIsDeleted(true);
 
     }
 

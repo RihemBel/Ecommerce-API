@@ -6,6 +6,7 @@ import com.example.ecommerce.Utility.HeaderUtil;
 import com.example.ecommerce.Utility.ResponseUtil;
 import com.example.ecommerce.Web.rest.errors.BadRequestAlertException;
 import com.example.ecommerce.entities.ImageItem;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api")
@@ -38,45 +41,67 @@ public class ImageController {
         this.imageService = imageService;
     }
 
+//    /**
+//     * {@code POST  /images} : Create a new image.
+//     *
+//     * @param image the image to create.
+//     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new image, or with status {@code 400 (Bad Request)} if the imageItem has already an ID.
+//     * @throws URISyntaxException if the Location URI syntax is incorrect.
+//     */
+//    @PostMapping("/images")
+//    public ResponseEntity<ImageItem> createImage(@Valid @RequestBody ImageItem image) throws URISyntaxException {
+//        log.debug("REST request to save Image : {}", image);
+//        if (image.getId() != null) {
+//            throw new BadRequestAlertException("A new image cannot already have an ID", ENTITY_NAME, "idexists");
+//        }
+//        ImageItem result = imageService.save(image);
+//        return ResponseEntity.created(new URI("/api/images/" + result.getId()))
+//                .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+//                .body(result);
+//    }
     /**
      * {@code POST  /images} : Create a new image.
      *
-     * @param image the image to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new image, or with status {@code 400 (Bad Request)} if the imageItem has already an ID.
+     * @param imageJson the image to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new image, or with status {@code 400 (Bad Request)} if the category has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/images")
-    public ResponseEntity<ImageItem> createImage(@Valid @RequestBody ImageItem image) throws URISyntaxException {
+    public ResponseEntity<ImageItem> createImage(@RequestParam(value = "files", required = false) MultipartFile files, @RequestParam("image") String imageJson) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+        Gson g = new Gson();
+        ImageItem image = g.fromJson(imageJson, ImageItem.class);
+
         log.debug("REST request to save Image : {}", image);
         if (image.getId() != null) {
             throw new BadRequestAlertException("A new image cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        ImageItem result = imageService.save(image);
+        ImageItem result = imageService.save(files, image);
+
         return ResponseEntity.created(new URI("/api/images/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                 .body(result);
     }
 
-    /**
-     * {@code PUT  /images} : Updates an existing image.
-     *
-     * @param image the image to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated image,
-     * or with status {@code 400 (Bad Request)} if the image is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the image couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PutMapping("/images")
-    public ResponseEntity<ImageItem> updateImage(@Valid @RequestBody ImageItem image) throws URISyntaxException {
-        log.debug("REST request to update Image : {}", image);
-        if (image.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        ImageItem result = imageService.save(image);
-        return ResponseEntity.ok()
-                .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, image.getId().toString()))
-                .body(result);
-    }
+//    /**
+//     * {@code PUT  /images} : Updates an existing image.
+//     *
+//     * @param image the image to update.
+//     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated image,
+//     * or with status {@code 400 (Bad Request)} if the image is not valid,
+//     * or with status {@code 500 (Internal Server Error)} if the image couldn't be updated.
+//     * @throws URISyntaxException if the Location URI syntax is incorrect.
+//     */
+//    @PutMapping("/images")
+//    public ResponseEntity<ImageItem> updateImage(@Valid @RequestBody ImageItem image) throws URISyntaxException {
+//        log.debug("REST request to update Image : {}", image);
+//        if (image.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        ImageItem result = imageService.save(image);
+//        return ResponseEntity.ok()
+//                .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, image.getId().toString()))
+//                .body(result);
+//    }
 
     /**
      * {@code GET  /images} : get all the images.
@@ -99,7 +124,7 @@ public class ImageController {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the image, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/image/{id}")
-    public ResponseEntity<ImageItem> getImage(@PathVariable Long id) {
+    public ResponseEntity<ImageItem> getImage(@PathVariable UUID id) {
         log.debug("REST request to get Image : {}", id);
         Optional<ImageItem> image = imageService.findOne(id);
         return ResponseUtil.wrapOrNotFound(image);

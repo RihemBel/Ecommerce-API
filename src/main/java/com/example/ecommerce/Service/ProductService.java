@@ -75,7 +75,7 @@ public class ProductService {
     public Page<Product> findAll(Pageable pageable) {
 
         log.debug("Request to get all Products");
-        return productRepository.findAll(pageable);
+        return productRepository.findAllP(pageable);
     }
 
     /**
@@ -125,20 +125,25 @@ public class ProductService {
      */
     public void delete(UUID id) throws IOException {
         log.debug("Request to delete Product : {}", id);
-        Optional<Product> product = this.findOne(id);
-        List<Item>itemList = pivvRepository.getAllItems_ofProduct(product.get().getId());
-        for(Item item: itemList){
-            Set<ImageItem> imageItemSet = item.getImage();
-            if(imageItemSet.size() != 0) {
-                for (ImageItem imageItem : imageItemSet) {
-                    imageService.delete(imageItem.getId());
+//        Optional<Product> product = this.findOne(id);
+//        List<Item>itemList = pivvRepository.getAllItems_ofProduct(product.get().getId());
+//        for(Item item: itemList){
+//            Set<ImageItem> imageItemSet = item.getImage();
+//            if(imageItemSet.size() != 0) {
+//                for (ImageItem imageItem : imageItemSet) {
+//                    imageService.delete(imageItem.getId());
+//
+//                }
+//            }
+//            itemRepository.deleteById(item.getId());
+//
+//        }
+        Product product = productRepository.findById(id).get();
+        product.setIsDeleted(true);
 
-                }
-            }
-            itemRepository.deleteById(item.getId());
-
+        for(Item item : product.getItem()) {
+            item.setIsDeleted(true);
         }
-        productRepository.deleteById(id);
 
     }
 
@@ -180,43 +185,43 @@ public class ProductService {
      *
      * @return the persisted entity.
      */
-    public Product save(MultipartFile files, Product product) throws IOException {
+    public Product save( Product product) throws IOException {
         log.debug("Request to save Product : {}", product);
 
-        System.out.println("files "+ files);
-        System.out.println("image "+ product.getImage());
-        if(files != null) {
-
-
-
-            String path = storageProps.getPath();
-            // do your stuff here
-            System.out.println(path);
-
-
-            String realPath = path.substring(7,path.length());
-            System.out.println(realPath);
-            String productFolder = realPath+"/topmaticImages/topmaticProducts/";
-            Path rootProduct = Paths.get(productFolder);
-            String currentDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-
-
-            Files.copy(files.getInputStream(), rootProduct.resolve(files.getOriginalFilename().replace(files.getOriginalFilename(),
-                    FilenameUtils.getBaseName(files.getOriginalFilename()).concat(currentDate) + "." + FilenameUtils.getExtension(files.getOriginalFilename()))));
-
-
-            /*get name of image with currentDate + extension*/
-            String fileName = files.getOriginalFilename();
-            int locationofExtension = fileName.lastIndexOf('.');
-            String extension = fileName.substring(locationofExtension, fileName.length());
-            String nameWithoutExtension = fileName.substring(0, locationofExtension);
-
-
-            String newNameOfImage = nameWithoutExtension + currentDate + extension;
-
-            String newPath = storageProps.getUrl()+"/topmaticImages/topmaticProducts/"+newNameOfImage;
-            product.setImage(newPath);
-        }
+//        System.out.println("files "+ files);
+//        System.out.println("image "+ product.getImage());
+//        if(files != null) {
+//
+//
+//
+//            String path = storageProps.getPath();
+//            // do your stuff here
+//            System.out.println(path);
+//
+//
+//            String realPath = path.substring(7,path.length());
+//            System.out.println(realPath);
+//            String productFolder = realPath+"/topmaticImages/topmaticProducts/";
+//            Path rootProduct = Paths.get(productFolder);
+//            String currentDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+//
+//
+//            Files.copy(files.getInputStream(), rootProduct.resolve(files.getOriginalFilename().replace(files.getOriginalFilename(),
+//                    FilenameUtils.getBaseName(files.getOriginalFilename()).concat(currentDate) + "." + FilenameUtils.getExtension(files.getOriginalFilename()))));
+//
+//
+//            /*get name of image with currentDate + extension*/
+//            String fileName = files.getOriginalFilename();
+//            int locationofExtension = fileName.lastIndexOf('.');
+//            String extension = fileName.substring(locationofExtension, fileName.length());
+//            String nameWithoutExtension = fileName.substring(0, locationofExtension);
+//
+//
+//            String newNameOfImage = nameWithoutExtension + currentDate + extension;
+//
+//            String newPath = storageProps.getUrl()+"/resources/topmaticImages/topmaticProducts/"+newNameOfImage;
+//            product.setImage(newPath);
+//        }
 
         return productRepository.save(product);
     }

@@ -1,5 +1,10 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -9,20 +14,37 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "subCategory")
-public class SubCategory implements Serializable {
+public class SubCategory  {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     @Column(name = "name")
     private String name;
     @ManyToOne
+    @JsonIgnoreProperties(value = "subCategory")
     private Category category;
     @Column(name = "image")
     private String image;
-    @OneToMany(mappedBy = "subCategory")
+
+//    @JsonIgnoreProperties(value = "subCategory")
+@Transient
+    @OneToMany(mappedBy = "subCategory" , cascade = CascadeType.ALL)
+    //@JsonBackReference
     private Set<Product> product=new HashSet<>();
-    @OneToMany(mappedBy = "subCategory")
-    private Set<Item> item=new HashSet<>();
+
+    @Column(name = "deleted")
+    private Boolean deleted= false;
+
+    public Boolean getIsDeleted() {
+        return deleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+
+
 
     public SubCategory() {
 
@@ -52,13 +74,7 @@ public class SubCategory implements Serializable {
         this.category = category;
     }
 
-    public Set<Item> getItem() {
-        return item;
-    }
 
-    public void setItem(Set<Item> item) {
-        this.item = item;
-    }
 
     public String getImage() {
         return image;
@@ -96,7 +112,6 @@ public class SubCategory implements Serializable {
                 ", category=" + category +
                 ", image='" + image + '\'' +
                 ", product=" + product +
-                ", item=" + item +
                 '}';
     }
 

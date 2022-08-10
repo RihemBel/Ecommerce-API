@@ -70,10 +70,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/register").permitAll()
+                .antMatchers("/api/users").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/api/categories/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/api/items/**").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CLIENT, AuthoritiesConstants.INTERNAUTE)
-                .antMatchers("/api/variants/**").hasAuthority(AuthoritiesConstants.CLIENT)
-                .antMatchers("/api/image/upload").permitAll()
+                .antMatchers("/api/variants/**").hasAnyAuthority(AuthoritiesConstants.CLIENT,AuthoritiesConstants.ADMIN)
+                .antMatchers("/api/products/**").permitAll()
+                .antMatchers("/api/images/**").permitAll()
+                .antMatchers("/api/paniers/**").permitAll()
+                .antMatchers("/api/orders/**").hasAnyAuthority(AuthoritiesConstants.CLIENT,AuthoritiesConstants.ADMIN)
                 .and()
                 .apply(securityConfigurerAdapter());
 

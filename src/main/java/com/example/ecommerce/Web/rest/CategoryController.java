@@ -1,6 +1,7 @@
 package com.example.ecommerce.Web.rest;
 
 import com.example.ecommerce.Service.CategoryService;
+import com.example.ecommerce.Service.SubCategoryService;
 import com.example.ecommerce.Utility.HeaderUtil;
 import com.example.ecommerce.Utility.ResponseUtil;
 import com.example.ecommerce.Web.rest.errors.BadRequestAlertException;
@@ -11,7 +12,6 @@ import com.google.gson.Gson;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,10 +35,11 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-//    private final SubCategoryService subCategoryService;
+    private final SubCategoryService subCategoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, SubCategoryService subCategoryService) {
         this.categoryService = categoryService;
+        this.subCategoryService = subCategoryService;
     }
 
     /**
